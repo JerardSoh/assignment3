@@ -128,7 +128,7 @@ const createTask = async (req, res) => {
             "INSERT INTO Task (Task_Name, Task_description, Task_notes, Task_id, Task_plan, Task_app_Acronym, Task_state, Task_creator, Task_owner, Task_createDate) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
             [
                 Task_Name,
-                Task_description,
+                Task_description || null,
                 Task_notes,
                 Task_id,
                 Task_plan || null,
