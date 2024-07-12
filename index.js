@@ -91,7 +91,7 @@ app.post("/CreateTask", async (req, res) => {
             [Task_app_Acronym]
         );
         if (app.length === 0) {
-            return res.status(404).json({ message: "App not found" });
+            return res.status(400).json({ message: "App not found" });
         }
 
         // Check username exists
@@ -299,7 +299,7 @@ app.patch("/PromoteTask2Done", async (req, res) => {
             [Task_app_Acronym]
         );
         if (app.length === 0) {
-            return res.status(404).json({ message: "App not found" });
+            return res.status(400).json({ message: "App not found" });
         }
 
         // Check if task exists
@@ -308,7 +308,7 @@ app.patch("/PromoteTask2Done", async (req, res) => {
             [Task_id]
         );
         if (tasks.length === 0) {
-            return res.status(404).json({ message: "Task not found" });
+            return res.status(400).json({ message: "Task not found" });
         }
         const task = tasks[0];
 
