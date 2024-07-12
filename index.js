@@ -2,6 +2,7 @@ const express = require("express");
 const bcrypt = require("bcryptjs");
 const mysql = require("mysql2/promise");
 const { format } = require("date-fns");
+const nodemailer = require("nodemailer");
 const app = express();
 const port = 3002;
 
@@ -395,16 +396,15 @@ app.patch("/PromoteTask2Done", async (req, res) => {
                 const transporter = nodemailer.createTransport({
                     service: "outlook",
                     auth: {
-                        user: process.env.EMAIL,
-                        pass: process.env.EMAIL_PASSWORD,
+                        user: "taskmanagementa21@outlook.com",
+                        pass: "Grookey123456!",
                     },
                 });
-
                 const mailOptions = {
-                    from: process.env.EMAIL,
+                    from: "taskmanagementa21@outlook.com",
                     to: emails.map((email) => email.email).join(","),
                     subject: `${task.Task_id} has been completed!`,
-                    text: `Task ${task.Task_Name} is completed by ${Task_owner}`,
+                    text: `Task ${task.Task_Name} is completed by ${user.username}`,
                 };
 
                 transporter.sendMail(mailOptions);
