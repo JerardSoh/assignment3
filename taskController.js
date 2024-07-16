@@ -35,9 +35,7 @@ const createTask = async (req, res) => {
     } = req.body;
 
     if (!username || !password || !Task_app_Acronym || !Task_Name) {
-        return res
-            .status(400)
-            .json({ message: "Invalid or missing mandatory fields" });
+        return res.status(400).send();
     }
 
     if (
@@ -46,19 +44,14 @@ const createTask = async (req, res) => {
         typeof Task_app_Acronym !== "string" ||
         typeof Task_Name !== "string"
     ) {
-        return res.status(400).json({
-            message: "Invalid input. All required fields must be strings.",
-        });
+        return res.status(400).send();
     }
 
     if (
         (Task_description && typeof Task_description !== "string") ||
         (Task_plan && typeof Task_plan !== "string")
     ) {
-        return res.status(400).json({
-            message:
-                "Invalid input. Optional fields must be strings if provided.",
-        });
+        return res.status(400).send();
     }
 
     const connection = await db.getConnection();
@@ -71,7 +64,7 @@ const createTask = async (req, res) => {
                 [Task_plan]
             );
             if (plan.length === 0) {
-                return res.status(400).json({ message: "Plan not found" });
+                return res.status(400).send();
             }
         }
 
@@ -80,7 +73,7 @@ const createTask = async (req, res) => {
             [Task_app_Acronym]
         );
         if (app.length === 0) {
-            return res.status(400).json({ message: "App not found" });
+            return res.status(400).send();
         }
 
         const [users] = await connection.query(
@@ -89,20 +82,18 @@ const createTask = async (req, res) => {
         );
         const user = users[0];
         if (!user) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const appPermitCreateGroup = app[0].App_permit_Create;
         const isInGroup = await checkGroup(user.username, appPermitCreateGroup);
         if (!isInGroup) {
-            return res.status(403).json({
-                message: "User does not have permission to create task",
-            });
+            return res.status(403).send();
         }
 
         const Task_id = `${Task_app_Acronym}_${app[0].App_Rnumber + 1}`;
@@ -148,9 +139,7 @@ const createTask = async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error("Error:", error.message);
-        res.status(500).json({
-            message: "Internal server error",
-        });
+        res.status(500).send();
     } finally {
         connection.release();
     }
@@ -160,9 +149,7 @@ const getTaskByState = async (req, res) => {
     const { username, password, Task_state } = req.body;
 
     if (!username || !password || !Task_state) {
-        return res
-            .status(400)
-            .json({ message: "Invalid or missing mandatory fields" });
+        return res.status(400).send();
     }
 
     if (
@@ -170,9 +157,7 @@ const getTaskByState = async (req, res) => {
         typeof password !== "string" ||
         typeof Task_state !== "string"
     ) {
-        return res.status(400).json({
-            message: "Invalid input. All required fields must be strings.",
-        });
+        return res.status(400).send();
     }
 
     if (
@@ -182,10 +167,7 @@ const getTaskByState = async (req, res) => {
         Task_state !== "done" &&
         Task_state !== "closed"
     ) {
-        return res.status(400).json({
-            message:
-                "Invalid input. Task_state must be 'open', 'todo', 'doing', 'done', or 'closed'.",
-        });
+        return res.status(400).send();
     }
 
     const connection = await db.getConnection();
@@ -199,12 +181,12 @@ const getTaskByState = async (req, res) => {
         );
         const user = users[0];
         if (!user) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const [tasks] = await connection.query(
@@ -230,9 +212,7 @@ const getTaskByState = async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error("Error:", error.message);
-        res.status(500).json({
-            message: "Internal server error",
-        });
+        res.status(500).send();
     } finally {
         connection.release();
     }
@@ -242,9 +222,7 @@ const promoteTask2Done = async (req, res) => {
     const { username, password, Task_id } = req.body;
 
     if (!username || !password || !Task_id) {
-        return res
-            .status(400)
-            .json({ message: "Invalid or missing mandatory fields" });
+        return res.status(400).send();
     }
 
     if (
@@ -252,9 +230,7 @@ const promoteTask2Done = async (req, res) => {
         typeof password !== "string" ||
         typeof Task_id !== "string"
     ) {
-        return res.status(400).json({
-            message: "Invalid input. All required fields must be strings.",
-        });
+        return res.status(400).send();
     }
 
     const connection = await db.getConnection();
@@ -267,7 +243,7 @@ const promoteTask2Done = async (req, res) => {
             [Task_id]
         );
         if (tasks.length === 0) {
-            return res.status(400).json({ message: "Task not found" });
+            return res.status(400).send();
         }
         const task = tasks[0];
 
@@ -275,9 +251,7 @@ const promoteTask2Done = async (req, res) => {
         const Task_app_Acronym = task.Task_app_Acronym;
 
         if (task.Task_state !== "doing") {
-            return res.status(400).json({
-                message: "Task is not in 'doing' state",
-            });
+            return res.status(400).send();
         }
 
         const [users] = await connection.query(
@@ -286,12 +260,12 @@ const promoteTask2Done = async (req, res) => {
         );
         const user = users[0];
         if (!user) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const isPasswordValid = await bcrypt.compare(password, user.password);
         if (!isPasswordValid) {
-            return res.status(401).json({ message: "Invalid credentials" });
+            return res.status(401).send();
         }
 
         const [appPermitDoing] = await connection.query(
@@ -301,9 +275,7 @@ const promoteTask2Done = async (req, res) => {
         const appPermitDoingGroup = appPermitDoing[0].App_permit_Doing;
         const isInGroup = await checkGroup(user.username, appPermitDoingGroup);
         if (!isInGroup) {
-            return res.status(403).json({
-                message: "User does not have permission to move task to done",
-            });
+            return res.status(403).send();
         }
 
         await connection.execute(
@@ -373,9 +345,7 @@ const promoteTask2Done = async (req, res) => {
     } catch (error) {
         await connection.rollback();
         console.error("Error:", error.message);
-        res.status(500).json({
-            message: "Internal server error",
-        });
+        res.status(500).send();
     } finally {
         connection.release();
     }

@@ -7,7 +7,7 @@ app.use(express.json());
 app.use("/", routes);
 
 app.all("*", (req, res) => {
-    res.status(404).json({ message: "Route not found" });
+    res.status(404).send();
 });
 
 const port = process.env.PORT;
