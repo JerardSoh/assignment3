@@ -239,9 +239,9 @@ const getTaskByState = async (req, res) => {
 };
 
 const promoteTask2Done = async (req, res) => {
-    const { username, password, Task_id, Task_app_Acronym } = req.body;
+    const { username, password, Task_id } = req.body;
 
-    if (!username || !password || !Task_id || !Task_app_Acronym) {
+    if (!username || !password || !Task_id) {
         return res
             .status(400)
             .json({ message: "Invalid or missing mandatory fields" });
@@ -250,8 +250,7 @@ const promoteTask2Done = async (req, res) => {
     if (
         typeof username !== "string" ||
         typeof password !== "string" ||
-        typeof Task_id !== "string" ||
-        typeof Task_app_Acronym !== "string"
+        typeof Task_id !== "string"
     ) {
         return res.status(400).json({
             message: "Invalid input. All required fields must be strings.",
@@ -263,14 +262,6 @@ const promoteTask2Done = async (req, res) => {
     try {
         await connection.beginTransaction();
 
-        const [app] = await connection.query(
-            "SELECT * FROM App WHERE App_Acronym = ?",
-            [Task_app_Acronym]
-        );
-        if (app.length === 0) {
-            return res.status(400).json({ message: "App not found" });
-        }
-
         const [tasks] = await connection.query(
             "SELECT * FROM Task WHERE Task_id = ?",
             [Task_id]
@@ -279,6 +270,9 @@ const promoteTask2Done = async (req, res) => {
             return res.status(400).json({ message: "Task not found" });
         }
         const task = tasks[0];
+
+        // Get the app acronym from the task
+        const Task_app_Acronym = task.Task_app_Acronym;
 
         if (task.Task_state !== "doing") {
             return res.status(400).json({

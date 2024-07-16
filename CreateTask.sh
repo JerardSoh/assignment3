@@ -17,7 +17,6 @@ PASSWORD_NO_ACCESS="pa55word!"
 APP_ACRONYM="test_app"
 TASK_NAME="Test Task Name"
 TASK_DESC="Test Task Name"
-
 TASK_PLAN="Test Plan 1"
 
 function test_start() {
@@ -39,7 +38,7 @@ function test_end() {
 # -s: Don't diplay progress bar.
 # -w: Write an output into our variable.
 
-test_start Valid input
+test_start "Valid input"
 EXPECTED_STATUS=$STATUS_OK
 OUTPUT_STATUS=$(curl --location $DOMAIN \
 --header 'Content-Type: application/json' \
