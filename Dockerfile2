@@ -1,0 +1,43 @@
+# Use the official Node.js image from Docker Hub
+FROM node:18-alpine AS builder
+
+# Create and set the working directory inside the container
+WORKDIR /app
+
+# Copy the tarball and the package.json to the container
+COPY package.json a3-1.0.0.tgz ./
+
+# npm install the tarball into a build folder and perform necessary actions
+RUN npm install --prefix ./build a3-1.0.0.tgz && \
+    cmp ./package.json ./build/node_modules/a3/package.json || (echo "Files differ. Stopping the build." && exit 1) && \
+    mkdir node_modules && \
+    mv ./build/node_modules/a3/node_modules/* ./node_modules && \
+    rm -rf /app/build
+
+# Copy the rest of the application code to the container
+COPY . .
+
+# Remove the tarball and the base image tar
+RUN rm /app/a3-1.0.0.tgz && \
+    rm /app/node18.tar
+
+# Final stage to create a minimal image
+FROM node:18-alpine
+
+# Set the working directory inside the container
+WORKDIR /app
+
+# Copy the application code and node_modules from the builder stage
+COPY --from=builder /app /app
+
+# Create a non-root user without a home directory
+RUN adduser -D -H appuser
+
+# Switch to the non-root user
+USER appuser
+
+# Expose the port your app runs on
+EXPOSE 3002
+
+# Command to run your application
+CMD ["node", "index.js"]
