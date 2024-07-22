@@ -14,10 +14,7 @@ RUN npm install
 COPY . .
 
 # Create a non-root user and group without a home directory
-RUN addgroup appgroup && adduser -D -G appgroup appuser
-
-# Change ownership of the application directory
-RUN chown -R appuser:appgroup /app
+RUN adduser -D -H appuser
 
 # Switch to the non-root user
 USER appuser
